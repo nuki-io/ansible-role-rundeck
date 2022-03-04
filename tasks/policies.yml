@@ -1,0 +1,46 @@
+---
+- name: configure default admin rundeck policy
+  ansible.builtin.template:
+    src: admin.aclpolicy.j2
+    dest: "{{ rundeck_default_admin_policy_path }}"
+    mode: "0644"
+  when: rundeck_default_admin_policy | bool
+  notify:
+    - restart rundeck
+
+- name: configure additional rundeck policies
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ (rundeck_policies_dir, item | basename | replace('.j2', '')) | path_join }}"
+    mode: "0644"
+  loop: "{{ rundeck_policies }}"
+  loop_control:
+    label: "{{ item | basename }}"
+  register: policies
+  notify:
+    - restart rundeck
+
+- name: find all ACL policies on host
+  ansible.builtin.find:
+    paths: "{{ rundeck_policies_dir }}"
+    recurse: no
+    patterns: "*.aclpolicy"
+  register: all_policies
+  when: rundeck_remove_superfluous_policies | bool
+
+- name: define expected policies
+  ansible.builtin.set_fact:
+    rundeck_expected_policies: "{{
+      all_policies.files | map(attribute='path')
+      + ([rundeck_default_admin_policy_path] if rundeck_default_admin_policy | bool else []) }}"
+  when: rundeck_remove_superfluous_policies | bool
+
+- name: remove superfluous ACL policies
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  with_items: "{{ rundeck_expected_policies |
+    difference(policies.results | map(attribute='dest')) }}"
+  when: rundeck_remove_superfluous_policies | bool
+  notify:
+    - restart rundeck

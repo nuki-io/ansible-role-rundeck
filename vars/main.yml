@@ -13,3 +13,6 @@ _rundeck_java_home:
   Fedora: /usr/lib/jvm/jre
 
 rundeck_java_home: "{{ _rundeck_java_home[ansible_distribution] | default(_rundeck_java_home['default'] ) }}"
+
+rundeck_policies_dir: "{{ rundeck_rdeckbase }}/etc/"
+rundeck_default_admin_policy_path: "{{ (rundeck_policies_dir, 'admin.aclpolicy') | path_join }}"
