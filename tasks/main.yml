@@ -63,13 +63,8 @@
   loop_control:
     label: "{{ item.parameter }}"
 
-- name: configure rundeck policy
-  ansible.builtin.template:
-    src: admin.aclpolicy.j2
-    dest: "{{ rundeck_rdeckbase }}/etc/admin.aclpolicy"
-    mode: "0644"
-  notify:
-    - restart rundeck
+- name: policies configuration
+  ansible.builtin.include_tasks: policies.yml
 
 - name: configure rundeck default users
   ansible.builtin.template:
