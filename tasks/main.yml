@@ -36,6 +36,8 @@
         description: Rundeck
         start_command: /usr/bin/java -Xmx{{ rundeck_xmx }}m -jar {{ rundeck_extra_jvm_args | join(' ') }} rundeck-{{ rundeck_version }}-{{ rundeck_release_date }}.war
         working_directory: "{{ rundeck_rdeckbase }}"
+        user_name: "{{ rundeck_service_user | d(omit) }}"
+        group_name: "{{ rundeck_service_group | d(omit) }}"
 
 - name: configure rundeck properties
   ansible.builtin.lineinfile:
