@@ -38,6 +38,7 @@
         working_directory: "{{ rundeck_rdeckbase }}"
         user_name: "{{ rundeck_service_user | d(omit) }}"
         group_name: "{{ rundeck_service_group | d(omit) }}"
+        environment_variables: "{{ rundeck_service_environment_variables | d(omit) }}"
 
 - name: configure rundeck properties
   ansible.builtin.lineinfile:
